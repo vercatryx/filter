@@ -203,13 +203,73 @@ change within a second.
 
 ---
 
-## Moving to a VPS (Phase 4 — later)
+## Moving to a VPS (Phase 4)
 
-When you're ready, the server scripts have a sibling
-`setup-server-vps.sh` (Linux variant — to be written when you're
-ready). It does the same thing using `apt-get install strongswan` +
-`nftables` instead of pf. The dashboard and CA migrate as-is. Devices
-need re-issued profiles with the new `RemoteAddress`. That's it.
+`setup-server-vps.sh` is the Linux variant of the Mac setup. Tested
+target: Ubuntu 24.04 on a small VPS. Same architecture, just `apt`
+instead of `brew`, `nftables` instead of `pf`, and `systemd` instead
+of `launchd`.
+
+### One-time on the VPS
+
+```bash
+# As root on the VPS (89.167.100.228 / filter.poel.ai)
+git clone https://github.com/vercatryx/filter.git /opt/filter
+cd /opt/filter
+
+# IMPORTANT — bring the existing CA over (or skip this for a brand-new
+# CA on the VPS). If you skip it, target devices already trusting your
+# Mac's CA will need re-issued profiles.
+# From your Mac:
+#   scp proxy-filter/server/ssl/ca.{crt,key} root@89.167.100.228:/opt/filter/proxy-filter/server/ssl/
+
+# Run the setup
+PROXY_FILTER_VPN_HOST=filter.poel.ai \
+PROXY_FILTER_VPN_HOST_2=89.167.100.228 \
+  sudo -E bash proxy-filter/server/scripts/setup-server-vps.sh
+```
+
+What this does:
+1. `apt install strongswan + nftables`, installs Node.js 22, installs
+   mitmproxy via `pipx`.
+2. Creates a `proxyfilter` system user (mitmproxy + dashboard backend
+   run as this, not root).
+3. Mints a server cert with both `filter.poel.ai` (DNS SAN) and
+   `89.167.100.228` (IP SAN), so devices can dial either while DNS is
+   still propagating.
+4. Wires `/etc/ipsec.conf`, `/etc/ipsec.secrets`, `/etc/ipsec.d/{cacerts,certs,private}/`.
+5. Enables IPv4 forwarding via `/etc/sysctl.d/`.
+6. Loads our `nftables.conf` ruleset (NAT 10.10.10.0/24 → public IP,
+   redirect TCP/80,443 → `127.0.0.1:8080`, drop UDP/443 to kill QUIC).
+7. Opens UFW for UDP/500, UDP/4500, and the dashboard port (default 5173).
+8. Installs `/etc/sudoers.d/proxyfilter` for the dashboard's reload calls.
+9. Installs systemd units `proxyfilter-mitm.service` and
+   `proxyfilter-backend.service`; enables `strongswan-starter.service`.
+10. Boots everything.
+
+After it finishes, ports listening:
+- UDP/500 + UDP/4500 → strongSwan
+- TCP/8080 → mitmproxy (loopback only)
+- TCP/5173 → dashboard backend
+
+Dashboard reachable at `http://89.167.100.228:5173/` (or
+`http://filter.poel.ai:5173/` once DNS is set). **It's unencrypted
+HTTP for now — fine while it's just you, but put Caddy or nginx in
+front with Let's Encrypt before sharing the URL.**
+
+### Then on a target device
+
+Sign in to the dashboard, create a profile (e.g. `david`), click
+**Download** to grab `david-filter.mobileconfig`. The profile will
+have `RemoteAddress = filter.poel.ai`. Install it on your Mac/iPhone.
+Done — you're filtered.
+
+### DNS
+
+Point `filter.poel.ai` at `89.167.100.228` (A record). The cert SAN
+already covers both, so devices can dial either. Once DNS is live,
+prefer the hostname (so you can move to a new IP without re-issuing
+profiles).
 
 ---
 

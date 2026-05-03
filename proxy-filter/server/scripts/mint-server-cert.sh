@@ -21,10 +21,28 @@ CA_KEY="ssl/ca.key"
 OUT_KEY="ipsec/vpn-server.key"
 OUT_CRT="ipsec/vpn-server.crt"
 
-# Default: bind cert to the Mac's default-route IP. Override via env var.
-DEFAULT_IFACE="$(route -n get default 2>/dev/null | awk '/interface:/ {print $2}')"
-DEFAULT_IP="$(ifconfig "$DEFAULT_IFACE" 2>/dev/null | awk '/inet / {print $2; exit}')"
-VPN_HOST="${PROXY_FILTER_VPN_HOST:-${DEFAULT_IP:-127.0.0.1}}"
+# Bind the cert to the host (hostname or IP) the device's profile will
+# dial. Override via PROXY_FILTER_VPN_HOST env var. If not set:
+#   - on macOS we auto-detect the default-route IP (dev convenience)
+#   - on Linux we leave it unset and require the env var (production)
+if [[ -z "${PROXY_FILTER_VPN_HOST:-}" ]]; then
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    DEFAULT_IFACE="$(route -n get default 2>/dev/null | awk '/interface:/ {print $2}')"
+    DEFAULT_IP="$(ifconfig "$DEFAULT_IFACE" 2>/dev/null | awk '/inet / {print $2; exit}')"
+    VPN_HOST="${DEFAULT_IP:-127.0.0.1}"
+  else
+    echo "ERROR: set PROXY_FILTER_VPN_HOST to the public hostname (or IP)" >&2
+    echo "       devices will use to dial the VPN." >&2
+    echo "       e.g.  PROXY_FILTER_VPN_HOST=filter.poel.ai $0" >&2
+    exit 2
+  fi
+else
+  VPN_HOST="$PROXY_FILTER_VPN_HOST"
+fi
+
+# Optional secondary SAN — useful when you have BOTH a hostname and a
+# raw IP and want either one to work as RemoteAddress in the .mobileconfig.
+SECONDARY_SAN="${PROXY_FILTER_VPN_HOST_2:-}"
 
 if [[ ! -f "$CA_CRT" || ! -f "$CA_KEY" ]]; then
   echo "ERROR: CA missing at $CA_CRT / $CA_KEY" >&2
@@ -58,13 +76,19 @@ extendedKeyUsage = serverAuth, 1.3.6.1.5.5.8.2.2
 subjectAltName = @san
 
 [san]
-$(if [[ "$VPN_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "IP.1 = $VPN_HOST"
-  echo "DNS.1 = vpn.proxyfilter.local"
-else
-  echo "DNS.1 = $VPN_HOST"
-  [[ -n "$DEFAULT_IP" ]] && echo "IP.1 = $DEFAULT_IP"
-fi)
+$(
+ip_count=0; dns_count=0
+add_san() {
+  local v="$1"
+  if [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    ip_count=$((ip_count+1)); echo "IP.$ip_count = $v"
+  else
+    dns_count=$((dns_count+1)); echo "DNS.$dns_count = $v"
+  fi
+}
+add_san "$VPN_HOST"
+[[ -n "$SECONDARY_SAN" && "$SECONDARY_SAN" != "$VPN_HOST" ]] && add_san "$SECONDARY_SAN"
+)
 EOF
 
 # 3. CSR
@@ -79,10 +103,11 @@ openssl x509 -req -in "$TMP_CONF.csr" \
   -sha256 2>/dev/null
 
 # 5. Verify
+sz() { wc -c < "$1" | tr -d ' '; }
 echo
 echo "✓ wrote:"
-echo "    $OUT_KEY  ($(stat -f '%z' "$OUT_KEY") bytes, mode 600)"
-echo "    $OUT_CRT  ($(stat -f '%z' "$OUT_CRT") bytes)"
+echo "    $OUT_KEY  ($(sz "$OUT_KEY") bytes, mode 600)"
+echo "    $OUT_CRT  ($(sz "$OUT_CRT") bytes)"
 echo
 echo "--- cert summary ---"
 openssl x509 -in "$OUT_CRT" -noout -subject -issuer -dates
