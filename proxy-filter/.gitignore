@@ -1,0 +1,17 @@
+# Part of proxy-filter module — see /proxy-filter/README.md
+.env
+
+# CA private key — never commit. ca.crt is OK to keep around for reference
+# but device-installed copies expire on a 10-year clock.
+server/ssl/ca.key
+server/ssl/ca.srl
+
+# htpasswd-style auth file (contains bcrypt hashes — still sensitive)
+server/passwd
+
+# Per-user allowlist files (everything except the .gitkeep + global.txt)
+server/allowlists/*.txt
+!server/allowlists/global.txt
+
+# Generated per-user profiles contain plaintext proxy passwords
+profile-generator/output/

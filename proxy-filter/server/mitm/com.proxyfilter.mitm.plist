@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- LaunchDaemon for mitmproxy in transparent mode.
+     Installed by setup-server-mac.sh to /Library/LaunchDaemons/.
+     Requires root because transparent mode reads pf state.
+     The {{REPO_DIR}} placeholder gets substituted at install time. -->
+<dict>
+    <key>Label</key>
+    <string>com.proxyfilter.mitm</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/mitmdump</string>
+        <string>--mode</string>
+        <string>transparent</string>
+        <string>--listen-host</string>
+        <string>127.0.0.1</string>
+        <string>--listen-port</string>
+        <string>8080</string>
+        <string>--showhost</string>
+        <string>--set</string>
+        <string>confdir={{REPO_DIR}}/proxy-filter/server/mitm/conf</string>
+        <string>--set</string>
+        <string>block_global=false</string>
+        <string>-s</string>
+        <string>{{REPO_DIR}}/proxy-filter/server/mitm/filter_addon.py</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/proxyfilter-mitm.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/proxyfilter-mitm.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>

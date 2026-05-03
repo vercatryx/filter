@@ -1,0 +1,3 @@
+# Part of proxy-filter module — see /proxy-filter/README.md
+# Shared allowlist applied to all authenticated users.
+# Per-user allowlists are <user_id>.txt in this same directory; see squid.conf.

@@ -1,0 +1,204 @@
+# Default MITM exclusions — domains we know will refuse interception.
+# One domain per line. Subdomain matches automatically (foo.example.com
+# matches "example.com").
+#
+# When a domain is listed here, mitmproxy peeks at the TLS Client Hello
+# (so we still see the SNI hostname) but does NOT decrypt — it tunnels
+# the raw bytes through. We can still apply hostname-based block/allow,
+# we just lose URL-level visibility for these flows.
+#
+# Sources:
+#   - Apple, "Use Apple products on enterprise networks":
+#     https://support.apple.com/en-us/101555
+#   - Cisco Umbrella, "TLS Decryption — Apple App Store, iCloud, etc."
+#   - mitmproxy/issues + community contributions
+#   - empirical: enterprise SSL-inspection deployment notes
+
+# ============================================================
+# Apple — system services that pin (cannot be MITM'd)
+# ============================================================
+
+# Push Notifications
+push.apple.com
+courier.push.apple.com
+gateway.icloud.com
+gateway.push.apple.com
+push.apns.apple.com.akadns.net
+
+# iCloud + iCloud Drive
+icloud.com
+icloud-content.com
+apple-cloudkit.com
+apple-livephotoskit.com
+ckdatabase.icloud.com
+fmf.icloud.com
+fmip.icloud.com
+identity.apple.com
+keyvalueservice.icloud.com
+mask.icloud.com
+mask-h2.icloud.com
+
+# App Store, Mac App Store, software updates
+itunes.apple.com
+apps.apple.com
+mzstatic.com
+appstore.com
+apple.com.akadns.net
+ocsp.apple.com
+crl.apple.com
+gs.apple.com
+swdownload.apple.com
+swcdn.apple.com
+swscan.apple.com
+swdist.apple.com
+mesu.apple.com
+
+# Apple ID + activation
+albert.apple.com
+identityservices.apple.com
+gsa.apple.com
+appleid.apple.com
+appleid.cdn-apple.com
+captive.apple.com
+
+# iMessage + FaceTime
+imessage.apple.com
+init.itunes.apple.com
+init.ess.apple.com
+ess.apple.com
+sp.itunes.apple.com
+xp.apple.com
+fmf.icloud.com
+
+# Apple TV+, Music, Books
+audio.itunes.apple.com
+amp-api.apple.com
+api.music.apple.com
+play.itunes.apple.com
+hls.itunes.apple.com
+stream.qtv.apple.com
+tv.apple.com
+appletvplus.com
+
+# Continuity, Find My, Bonjour
+fmip.icloud.com
+fmf.icloud.com
+search-mark.apple.com
+metric.apple.com
+
+# Configuration / MDM / DEP / ABM / ASM
+business.apple.com
+school.apple.com
+deviceenrollment.apple.com
+mdmenrollment.apple.com
+profileavailability.apple.com
+iprofiles.apple.com
+albert.apple.com
+
+# Notarization / GateKeeper / XProtect
+xp.apple.com
+api.apple-cloudkit.com
+osxapps.itunes.apple.com
+
+# ============================================================
+# Google — pinned services
+# ============================================================
+
+# Google Play Services (Android, but iOS apps use some)
+android.googleapis.com
+play.googleapis.com
+clients3.google.com
+clients4.google.com
+clients5.google.com
+
+# Workspace endpoints that pin
+mail.google.com
+calendar.google.com
+drive.google.com
+docs.google.com
+accounts.google.com
+
+# YouTube uses certificate pinning in its app
+youtube.com
+youtubei.googleapis.com
+youtu.be
+
+# Google Maps app
+maps.googleapis.com
+
+# ============================================================
+# Microsoft — pinned services
+# ============================================================
+login.microsoftonline.com
+login.live.com
+graph.microsoft.com
+outlook.office365.com
+teams.microsoft.com
+
+# ============================================================
+# E2E messengers (correctly refuse MITM by design)
+# ============================================================
+signal.org
+signal.com
+whatsapp.com
+whatsapp.net
+telegram.org
+telegram.me
+t.me
+threema.ch
+wickr.com
+
+# ============================================================
+# Banking — common in the US (extend per region)
+# ============================================================
+chase.com
+bankofamerica.com
+wellsfargo.com
+usbank.com
+citibank.com
+citi.com
+capitalone.com
+discover.com
+americanexpress.com
+schwab.com
+fidelity.com
+vanguard.com
+ally.com
+synchronybank.com
+
+# ============================================================
+# Other services that pin
+# ============================================================
+
+# Dropbox
+dropbox.com
+
+# 1Password / Bitwarden / LastPass
+1password.com
+bitwarden.com
+lastpass.com
+
+# Slack
+slack.com
+slack-edge.com
+
+# Zoom
+zoom.us
+
+# GitHub mobile apps
+github.com  # web is fine to MITM; the iOS app pins.
+            # Tradeoff: leaving in means GitHub web is also passthrough.
+            # Remove this line if you want GitHub URL visibility.
+
+# Gaming services that pin
+nintendo.net
+playstation.net
+xboxlive.com
+
+# Anti-virus / EDR products often pin
+nortonsecurity.com
+mcafee.com
+kaspersky.com
+sophos.com
+crowdstrike.com
+sentinelone.com

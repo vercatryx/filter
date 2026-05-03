@@ -1,0 +1,15 @@
+{
+  "name": "proxy-filter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate-profile": "node profile-generator/generate-profile.js",
+    "proxy": "node server/proxy.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.0",
+    "node-forge": "^1.3.1"
+  }
+}

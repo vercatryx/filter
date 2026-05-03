@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- LaunchDaemon for strongSwan/charon (the IKE daemon).
+     Installed by setup-server-mac.sh to /Library/LaunchDaemons/.
+     Runs as root because IKEv2 binds privileged UDP ports
+     (500, 4500) and configures network interfaces. -->
+<dict>
+    <key>Label</key>
+    <string>com.proxyfilter.strongswan</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/sbin/ipsec</string>
+        <string>start</string>
+        <string>--nofork</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/proxyfilter-strongswan.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/proxyfilter-strongswan.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/sbin:/opt/homebrew/bin:/usr/sbin:/sbin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>

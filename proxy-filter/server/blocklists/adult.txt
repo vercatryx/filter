@@ -1,0 +1,5 @@
+# Part of proxy-filter module — see /proxy-filter/README.md
+# Managed by the admin dashboard. Edits made here are overwritten on next save.
+# One domain per line. Subdomains match automatically.
+777.com
+example-blocked-domain.test

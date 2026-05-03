@@ -1,0 +1,27 @@
+# Part of proxy-filter module — see /proxy-filter/README.md
+services:
+  squid:
+    image: ubuntu/squid:latest
+    container_name: proxy-filter-squid
+    restart: unless-stopped
+    ports:
+      - "${PROXY_PORT:-3128}:3128"
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+      - ./ssl:/etc/squid/ssl:ro
+      - ./blocklists:/etc/squid/blocklists:ro
+      - ./allowlists:/etc/squid/allowlists
+      - ./passwd:/etc/squid/passwd
+      - squid-cache:/var/spool/squid
+      - squid-ssl-db:/var/lib/squid/ssl_db
+      - squid-logs:/var/log/squid
+    healthcheck:
+      test: ["CMD-SHELL", "squidclient -h localhost -p 3128 mgr:info > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  squid-cache:
+  squid-ssl-db:
+  squid-logs:

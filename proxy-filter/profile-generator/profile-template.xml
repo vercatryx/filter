@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Part of proxy-filter module — see /proxy-filter/README.md
+  All curly-brace tokens like USER_ID, PROXY_HOST, etc. are substituted by generate-profile.js.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadDisplayName</key>
+    <string>Network Configuration</string>
+    <key>PayloadDescription</key>
+    <string>Configures network and security settings for this device.</string>
+    <key>PayloadIdentifier</key>
+    <string>com.device.networkconfig.{USER_ID}</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>{PROFILE_UUID}</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadScope</key>
+    <string>System</string>
+    <key>ConsentText</key>
+    <dict>
+        <key>default</key>
+        <string>This profile installs network filtering settings on this Mac. Once installed, it can only be removed with the administrator-issued removal password.</string>
+    </dict>
+    <key>PayloadContent</key>
+    <array>
+
+        <!-- Payload 1 — Root Certificate (CA for SSL inspection) -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.security.root</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.cert.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_1_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Network Security Certificate</string>
+            <key>PayloadCertificateFileName</key>
+            <string>ca.crt</string>
+            <key>PayloadContent</key>
+            <data>{BASE64_CA_CERT}</data>
+        </dict>
+
+        <!-- Payload 2 — Global HTTP Proxy (forces all OS traffic through Squid) -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.proxy.http.global</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.proxy.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_2_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Network Proxy</string>
+            <key>ProxyType</key>
+            <string>Manual</string>
+            <key>ProxyServer</key>
+            <string>{PROXY_HOST}</string>
+            <key>ProxyServerPort</key>
+            <integer>{PROXY_PORT}</integer>
+            <key>ProxyCaptiveLoginAllowed</key>
+            <true/>
+        </dict>
+
+        <!-- Payload 3 — Chrome browser policy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.chrome.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_3_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Chrome Settings</string>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.google.Chrome</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>DnsOverHttpsMode</key>
+                                <string>secure</string>
+                                <key>DnsOverHttpsTemplates</key>
+                                <string>{DOH_URL}</string>
+                                <key>BuiltInDnsClientEnabled</key>
+                                <false/>
+                                <key>ForceGoogleSafeSearch</key>
+                                <true/>
+                                <key>ForceYouTubeRestrict</key>
+                                <integer>2</integer>
+                                <key>BrowserSignin</key>
+                                <integer>0</integer>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+
+        <!-- Payload 4 — Edge browser policy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.edge.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_4_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Edge Settings</string>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.microsoft.Edge</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>DnsOverHttpsMode</key>
+                                <string>secure</string>
+                                <key>DnsOverHttpsTemplates</key>
+                                <string>{DOH_URL}</string>
+                                <key>BuiltInDnsClientEnabled</key>
+                                <false/>
+                                <key>ForceGoogleSafeSearch</key>
+                                <true/>
+                                <key>ForceYouTubeRestrict</key>
+                                <integer>2</integer>
+                                <key>BrowserSignin</key>
+                                <integer>0</integer>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+
+        <!-- Payload 5 — Brave browser policy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.brave.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_5_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Brave Settings</string>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.brave.Browser</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>DnsOverHttpsMode</key>
+                                <string>secure</string>
+                                <key>DnsOverHttpsTemplates</key>
+                                <string>{DOH_URL}</string>
+                                <key>BuiltInDnsClientEnabled</key>
+                                <false/>
+                                <key>ForceGoogleSafeSearch</key>
+                                <true/>
+                                <key>ForceYouTubeRestrict</key>
+                                <integer>2</integer>
+                                <key>BrowserSignin</key>
+                                <integer>0</integer>
+                                <key>TorDisabled</key>
+                                <true/>
+                                <key>BraveVPNDisabled</key>
+                                <true/>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+
+        <!-- Payload 6 — Safari browser policy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.safari.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_6_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Safari Settings</string>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.apple.Safari</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>WarnAboutFraudulentWebsites</key>
+                                <true/>
+                                <key>ExtensionsEnabled</key>
+                                <false/>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+
+        <!-- Payload 7 — Opera browser policy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.opera.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_7_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Opera Settings</string>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.operasoftware.Opera</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>DnsOverHttpsMode</key>
+                                <string>secure</string>
+                                <key>DnsOverHttpsTemplates</key>
+                                <string>{DOH_URL}</string>
+                                <key>BuiltInDnsClientEnabled</key>
+                                <false/>
+                                <key>ForceGoogleSafeSearch</key>
+                                <true/>
+                                <key>ForceYouTubeRestrict</key>
+                                <integer>2</integer>
+                                <key>BrowserSignin</key>
+                                <integer>0</integer>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+
+        <!-- Payload 8 — System Preferences lockdown -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.systempreferences</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.sysprefs.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_8_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>System Preferences</string>
+            <key>DisabledPreferencePanes</key>
+            <array>
+                <string>com.apple.preference.network</string>
+                <string>com.apple.preferences.configurationprofiles</string>
+                <string>com.apple.preference.security</string>
+            </array>
+        </dict>
+
+        <!-- Payload 9 — Profile removal password -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.profileRemovalPassword</string>
+            <key>PayloadIdentifier</key>
+            <string>com.device.networkconfig.removal.{USER_ID}</string>
+            <key>PayloadUUID</key>
+            <string>{PAYLOAD_9_UUID}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Profile Removal</string>
+            <key>RemovalPassword</key>
+            <string>{REMOVAL_PASSWORD}</string>
+        </dict>
+
+    </array>
+</dict>
+</plist>

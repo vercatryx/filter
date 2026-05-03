@@ -1,0 +1,61 @@
+# === OS / editor noise ===
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# === Node.js ===
+node_modules/
+
+# === Logs ===
+*.log
+
+# === Secrets — private keys ===
+# CA, VPN server, per-device IKEv2 keys, anything that ends in .key.
+# Never commit a private key.
+*.key
+*.srl
+
+# === PKCS#12 bundles (private keys + cert) ===
+*.p12
+
+# === Auth password files ===
+proxy-filter/server/passwd
+
+# === Per-device profile artifacts ===
+# Each profile directory holds <user_id>.{key,crt,p12} + per-profile
+# blocklist.txt + allowlist.txt. Treat the whole subtree as private.
+proxy-filter/server/profiles/
+
+# === Runtime state written by the dashboard ===
+proxy-filter/server/vpn-allocations.json
+proxy-filter/server/rules.json
+proxy-filter/server/ports.json
+proxy-filter/server/pf/pf.conf.live
+
+# === WireGuard configs (contain private keys) ===
+proxy-filter/localtest/wg/
+
+# === mitmproxy auto-generated state (CA, DH params, ssl_db cache) ===
+**/mitmproxy-ca.pem
+**/mitmproxy-ca.p12
+**/mitmproxy-ca-cert.*
+**/mitmproxy-dhparam.pem
+**/mitm-conf/
+proxy-filter/server/mitm/conf/
+
+# === Generated .mobileconfig files (embed p12s + removal passwords) ===
+*.mobileconfig
+
+# === Backend env + data ===
+backend/.env
+backend/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# === Spike artifacts (keep the .md / .mjs / .sh sources, drop outputs) ===
+spikes/spike-b/
+spikes/seed.log
